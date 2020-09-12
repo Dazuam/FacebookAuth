@@ -1,5 +1,6 @@
 let passport = require('passport');
 let LocalStrategy = require('passport-local').Strategy;
+let FacebookStrategy = require('passport-facebook').Strategy;
 let UserModel = require('../models/User');
 let bcrypt = require('bcryptjs');
 
@@ -30,8 +31,24 @@ const verifyCallback = (email, password, done) => {
 }
 
 const strategy  = new LocalStrategy(userTableFields, verifyCallback);
-
 passport.use(strategy);
+
+const fbConfigs = {
+  clientID: process.env.PASSPORT_FACEBOOK_CLIENT_ID,
+  clientSecret: process.env.PASSPORT_FACEBOOK_CLIENT_SECRET,
+  callbackURL: 'http://localhost:3000/auth/fb/callback',
+  profileFields: ['email', 'name']
+};
+const fbStrategy = new FacebookStrategy(fbConfigs, (accessToken, refreshToken, profile, done) => {
+  console.log(profile);
+  UserModel.create({ name: profile.name.givenName, email: profile.name.givenName, password: profile.name.givenName })
+    .then((id) => {
+      return UserModel.find(id)
+        .then(user => done(null, user) )
+    });
+});
+
+passport.use(fbStrategy);
 
 // Guarda en las variables de sesión el id del usuario loggeado
 passport.serializeUser((user, done) => {

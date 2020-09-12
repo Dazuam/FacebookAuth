@@ -21,4 +21,16 @@ router.get('/protected', authMiddleware.isAuth, (req, res) => {
   res.send('Protected route, user correctly authenticated');
 })
 
+router.get('/auth/fb/login', passport.authenticate('facebook'));
+router.get('/auth/fb/callback', passport.authenticate('facebook', {
+  successRedirect: '/auth/fb/success',
+  failureRedirect: '/auth/fb/fail'
+}));
+router.get('/auth/fb/success', (req, res) => {
+  res.send('Facebook success');
+});
+router.get('/auth/fb/fail', (req, res) => {
+  res.send('Facebook failed');
+});
+
 module.exports = router;
